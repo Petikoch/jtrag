@@ -24,12 +24,13 @@ repositories {
 }
 
 dependencies {
-    compile 'ch.petikoch.libs.jtwfg:jtwfg:+'
+    compile 'ch.petikoch.libs:jtwfg:+'
 
     testCompile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.3.8', classifier: 'indy'
     testCompile('org.spockframework:spock-core:0.7-groovy-2.0') {
         exclude group: 'org.codehaus.groovy'
     }
+    testCompile 'cglib:cglib-nodep:3.1' // spock mocks
     testCompile 'com.google.guava:guava:18.0' // provides e.g. nice Multimap
 }
 
@@ -38,7 +39,7 @@ jar {
         attributes 'Implementation-Title': project.name,
                 'Implementation-Version': project.version,
                 'Built-By': System.getProperty('user.name'),
-                'Built-Date': new java.util.Date(),
+                'Built-Date': new Date(),
                 'Built-JDK': System.getProperty('java.version'),
                 'Built-Gradle': gradle.gradleVersion
     }
