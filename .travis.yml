@@ -5,6 +5,7 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 
+# https://joerglenhard.wordpress.com/2013/10/01/using-travis-ci-with-gradle-wrapper
 before_install:
  - chmod +x gradlew
 
