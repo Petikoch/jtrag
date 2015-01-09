@@ -18,6 +18,7 @@ package ch.petikoch.libs.jtrag
 import ch.petikoch.libs.jtwfg.DeadlockDetector
 import ch.petikoch.libs.jtwfg.Graph
 import com.google.common.collect.Multimap
+import com.google.common.collect.Multimaps
 import com.google.common.collect.Sets
 import com.google.common.collect.TreeMultimap
 import groovy.transform.CompileStatic
@@ -82,6 +83,67 @@ class ExecutableDocumentation extends Specification {
 		and: 'you see where the deadlock is'
 
 		analysisResult.deadlockCycles.getAt(0).getCycleTasks() == ['r1', 't2', 'r2', 't1', 'r1']
+	}
+
+	def 'Use case 2: As you update your domain model, you update the jtrag model and check for deadlocks'() {
+
+		given: 'Your own domain model with some kind of tasks, resources and dependencies between them'
+
+		Set<String> yourModelTasks = Sets.newTreeSet().asSynchronized()
+		Set<String> yourModelResources = Sets.newTreeSet().asSynchronized()
+		Multimap<String, String> yourModelTask2ResourceDependencies = Multimaps.synchronizedSortedSetMultimap(TreeMultimap.create())
+		Multimap<String, String> yourModelResource2TaskAssignments = Multimaps.synchronizedSortedSetMultimap(TreeMultimap.create())
+
+		and: 'the jtrag GraphBuilder with a DeadlockDetector'
+
+		def jtragGraphBuilder = new GraphBuilder<String, String>()
+		def jtwfgDeadlockDetector = new DeadlockDetector<Object>()
+
+		when: 'you add a task into your model, you add it also into the jtwfg model (might be a separate thread)'
+
+		yourModelTasks.add('t1')
+		jtragGraphBuilder.addTask('t1')
+
+		then: 'you immediately check for deadlocks'
+		jtwfgDeadlockDetector.analyze(jtragGraphBuilder.build()).hasDeadlock() == false
+
+		when: 'you add a resource into your model, you add it also into the jtwfg model (might be a separate thread)'
+
+		yourModelResources.add('r1')
+		jtragGraphBuilder.addResource('r1')
+
+		then: 'you immediately check for deadlocks'
+		jtwfgDeadlockDetector.analyze(jtragGraphBuilder.build()).hasDeadlock() == false
+
+		when: 'you add more tasks and resources, you update your model and the jtwfg model (might be a separate thread)'
+
+		yourModelTask2ResourceDependencies.put('t1', 'r1')
+		jtragGraphBuilder.addTask2ResourceDependency('t1', 'r1')
+		yourModelResource2TaskAssignments.put('r1', 't2')
+		jtragGraphBuilder.addResource2TaskAssignment('r1', 't2')
+		yourModelTask2ResourceDependencies.put('t2', 'r2')
+		jtragGraphBuilder.addTask2ResourceDependency('t2', 'r2')
+		yourModelResource2TaskAssignments.put('r2', 't1')
+		jtragGraphBuilder.addResource2TaskAssignment('r2', 't1')
+
+		and: 'you immediately check for deadlocks again'
+
+		def analysisReport = jtwfgDeadlockDetector.analyze(jtragGraphBuilder.build())
+
+		then: 'you see if you have a deadlock'
+
+		analysisReport.hasDeadlock() == true
+
+		and: 'you see where the deadlock is'
+
+		analysisReport.deadlockCycles.size() == 1
+		analysisReport.deadlockCycles.getAt(0).getCycleTasks() == ['r1', 't2', 'r2', 't1', 'r1']
+
+		and: 'you can also ask if a certain task is deadlocked'
+		analysisReport.isDeadlocked('t1')
+		analysisReport.isDeadlocked('t2')
+		analysisReport.isDeadlocked('r1')
+		analysisReport.isDeadlocked('r2')
 	}
 
 	def 'Custom types for task and resource IDs in the graph: You can use standard types like String, Integer, ... or you can use you own custom types from e.g. your domain model'() {
