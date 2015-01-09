@@ -10,7 +10,7 @@ apply plugin: 'maven-publish'
 // "incubating"
 apply plugin: 'jacoco'
 
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 ext.artifactGroupId = 'ch.petikoch.libs'
 ext.description = 'A little java 7+ library (on top of jtwfg) using a "task resource assignment graph" model to detect deadlocks'
 
@@ -85,7 +85,7 @@ def pomConfig = {
     name project.name
     description project.description
     url 'https://github.com/Petikoch/jtrag'
-    inceptionYear '2014'
+    inceptionYear '2015'
 
     scm { url 'https://github.com/Petikoch/jtrag.git' }
 
@@ -122,23 +122,45 @@ publishing {
             from components.java
 
             pom.withXml {
-                asNode().children().last() + pomConfig
+                def node = asNode()
+                node.children().last() + pomConfig
 
-                // hack... build up the test dependencies ourselve
+                // ugly dirty hack... build up the test dependencies ourselve
                 // why? because maven-publish plugin creates crapy dependencies in pom.xml (gradle 2.2)
                 // see http://stackoverflow.com/questions/20131915/publishing-artifact-from-gradle-project-to-bintray-maven-repository
                 // solution: http://stackoverflow.com/questions/24743562/gradle-not-including-dependencies-in-published-pom-xml
-                def dependenciesNode = asNode().appendNode('dependencies')
+
+                node.remove(node.dependencies)
+
+                def dependenciesNode = node.appendNode('dependencies')
                 configurations.testCompile.allDependencies.each {
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
-                    dependencyNode.appendNode('scope', 'test')
-                    if (it.name == 'groovy-all') {
-                        dependencyNode.appendNode('classifier', 'indy')
+                    if (it.name != 'jtwfg') {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        if (it.version == '+') {
+                            dependencyNode.appendNode('version', 'RELEASE')
+                        } else {
+                            dependencyNode.appendNode('version', it.version)
+                        }
+                        dependencyNode.appendNode('scope', 'test')
+                        if (it.name == 'groovy-all') {
+                            dependencyNode.appendNode('classifier', 'indy')
+                        }
+                    } else {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        if (it.version == '+') {
+                            dependencyNode.appendNode('version', 'RELEASE')
+                        } else {
+                            dependencyNode.appendNode('version', it.version)
+                        }
+                        dependencyNode.appendNode('scope', 'compile')
                     }
                 }
+
+                return node
             }
 
             artifact sourceJar {

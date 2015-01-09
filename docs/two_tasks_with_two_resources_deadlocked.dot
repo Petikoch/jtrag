@@ -1,0 +1,15 @@
+digraph two_tasks_with_two_resources_deadlocked {
+
+	rankdir=TB;
+
+	"Task 1" [shape=oval]
+	"Task 2" [shape=oval]
+
+	"Resource 1" [shape=box]
+	"Resource 2" [shape=box]
+
+	"Task 1" -> "Resource 1" [ label = "depends on" ];
+	"Resource 1" -> "Task 2" [ label = "is assigned to" ];
+	"Task 2" -> "Resource 2" [ label = "depends on" ];
+	"Resource 2" -> "Task 1" [ label = "is assigned to" ];
+}
