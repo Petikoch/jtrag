@@ -11,7 +11,6 @@ It adds a "task resource assignment graph" API.
 
 Any "task resource assignment graph" cycle detection problem can be used with a simple "task wait for graph" model:
 Just use tasks for resources.
-
 But: A "task resource assignment graph" API is more clear to use *if* you have tasks *and* resources in your domain model.
 
 Best regards,
