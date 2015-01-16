@@ -178,7 +178,7 @@ class ExecutableDocumentation extends Specification {
 		then:
 		analysisResult.hasDeadlock() == true
 		analysisResult.deadlockCycles.size() == 1
-		analysisResult.deadlockCycles[0].toString() == 'DeadlockCycle: CustomTaskId-t1 -> CustomResourceId-r1 -> CustomTaskId-t2 -> CustomResourceId-r2 -> CustomTaskId-t3 -> CustomResourceId-r3 -> CustomTaskId-t1'
+		analysisResult.deadlockCycles[0].toString() == 'DeadlockCycle: CustomResourceId-r1 -> CustomTaskId-t2 -> CustomResourceId-r2 -> CustomTaskId-t3 -> CustomResourceId-r3 -> CustomTaskId-t1 -> CustomResourceId-r1'
 	}
 
 	@CompileStatic
