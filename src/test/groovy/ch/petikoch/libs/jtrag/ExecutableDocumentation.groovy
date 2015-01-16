@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package ch.petikoch.libs.jtrag
-
 import ch.petikoch.libs.jtwfg.DeadlockDetector
 import ch.petikoch.libs.jtwfg.Graph
 import com.google.common.collect.Multimap
@@ -155,16 +154,25 @@ class ExecutableDocumentation extends Specification {
 		def customResourceId2 = new CustomResourceId('r2')
 
 		when:
-		jtragGraphBuilder.addTask(customTaskId1)
-		jtragGraphBuilder.addTask(customTaskId2)
-		jtragGraphBuilder.addResource(customResourceId1)
-		jtragGraphBuilder.addResource(customResourceId2)
+		jtragGraphBuilder.addTask2ResourceDependency(customTaskId1, customResourceId1)
+		jtragGraphBuilder.addResource2TaskAssignment(customResourceId1, customTaskId2)
+		jtragGraphBuilder.addTask2ResourceDependency(customTaskId2, customResourceId2)
+		jtragGraphBuilder.addResource2TaskAssignment(customResourceId2, customTaskId1)
 		Graph<Object> graph = jtragGraphBuilder.build()
 
 		then:
 		graph.getTasks().size() == 4
 		graph.getTasks().collect { it.id }.toSet() ==
 				[customTaskId1, customTaskId2, customResourceId1, customResourceId2] as Set
+
+		when:
+		def jtwfgDeadlockDetector = new DeadlockDetector<Object>()
+		def analysisResult = jtwfgDeadlockDetector.analyze(graph)
+
+		then:
+		analysisResult.hasDeadlock() == true
+		analysisResult.deadlockCycles.size() == 1
+		analysisResult.deadlockCycles[0].toString() == 'DeadlockCycle: CustomResourceId-r1 -> CustomTaskId-t2 -> CustomResourceId-r2 -> CustomTaskId-t1 -> CustomResourceId-r1'
 	}
 
 	@CompileStatic
@@ -179,6 +187,10 @@ class ExecutableDocumentation extends Specification {
 		CustomTaskId(final String internalId) {
 			this.internalId = internalId
 		}
+
+		String toString() {
+			"${CustomTaskId.class.simpleName}-${internalId}"
+		}
 	}
 
 	@CompileStatic
@@ -192,6 +204,10 @@ class ExecutableDocumentation extends Specification {
 
 		CustomResourceId(final String internalId) {
 			this.internalId = internalId
+		}
+
+		String toString() {
+			"${CustomResourceId.class.simpleName}-${internalId}"
 		}
 	}
 }
