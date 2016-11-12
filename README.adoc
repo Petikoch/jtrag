@@ -148,7 +148,7 @@ repositories {
 }
 
 dependencies {
-    compile 'ch.petikoch.libs:jtrag:1.0.0' // or whatever explicit version
+    compile 'ch.petikoch.libs:jtrag:1.0.4' // or whatever explicit version
 
     // or "latest", for the braves:
     //compile 'ch.petikoch.libs:jtrag:+'
