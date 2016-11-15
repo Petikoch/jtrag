@@ -165,7 +165,7 @@ Add jtrag as dependency to your pom.xml:
             <groupId>ch.petikoch.libs</groupId>
             <artifactId>jtrag</artifactId>
             <version>x.y.z</version>
-            <!-- or latest release (not snapshot), for the braves
+            <!-- or latest release, for the braves
             <version>RELEASE</version>
             -->
         </dependency>
