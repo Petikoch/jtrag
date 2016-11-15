@@ -148,9 +148,9 @@ repositories {
 }
 
 dependencies {
-    compile 'ch.petikoch.libs:jtrag:1.0.4' // or whatever explicit version
+    compile 'ch.petikoch.libs:jtrag:x.y.z'
 
-    // or "latest", for the braves:
+    // or "latest" release, for the braves:
     //compile 'ch.petikoch.libs:jtrag:+'
 }
 ----
@@ -164,7 +164,7 @@ Add jtrag as dependency to your pom.xml:
         <dependency>
             <groupId>ch.petikoch.libs</groupId>
             <artifactId>jtrag</artifactId>
-            <version>1.0.4</version> <!-- or whatever version -->
+            <version>x.y.z</version>
             <!-- or latest release (not snapshot), for the braves
             <version>RELEASE</version>
             -->
